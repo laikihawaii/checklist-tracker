@@ -34,31 +34,41 @@ class UIManager {
   }
 
     async renderCurrentTask() {
-        const tasks = await this.dm.getTasks();
+      const tasks = await this.dm.getTasks();
 
-        if (tasks.length === 0) {
-            document.getElementById('currentTaskName').textContent = 'No task yet';
-            document.getElementById('taskDate').textContent = '';
-            this.currentTaskId = null;
-            document.getElementById('checklistContainer').innerHTML = '';
-            return;
-        }
+      if (tasks.length === 0) {
+          document.getElementById('currentTaskName').textContent = 'No task yet';
+          document.getElementById('taskDate').textContent = '';
+          this.currentTaskId = null;
+          document.getElementById('checklistContainer').innerHTML = '';
+          return;
+      }
 
-        const task = tasks[0];
-        this.currentTaskId = task.id;
+      // If we have a current task ID, use that. Otherwise use the first (most recent)
+      let task;
+      if (this.currentTaskId) {
+          task = tasks.find(t => t.id === this.currentTaskId);
+          if (!task) {
+              task = tasks[0]; // Fallback if task not found
+          }
+      } else {
+          task = tasks[0]; // First time, show most recent
+      }
 
-        const date = new Date(task.timestamp);
-        const dateStr = date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        });
+      this.currentTaskId = task.id;
 
-        document.getElementById('currentTaskName').textContent = task.name;
-        document.getElementById('taskDate').textContent = dateStr;
-        await this.renderChecklist(task.checked_items || []);
-    }
+      const date = new Date(task.timestamp);
+      const dateStr = date.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+      });
+
+      document.getElementById('currentTaskName').textContent = task.name;
+      document.getElementById('taskDate').textContent = dateStr;
+      await this.renderChecklist(task.checked_items || []);
+  }
 
     async renderChecklist(checkedItemIds = []) {
         if (this.isRendering) return;
@@ -355,17 +365,22 @@ class UIManager {
         }
     }
 
-    async onNewTask() {
-        showLoading(true);
-        try {
-            const task = await this.dm.addTask();
-            await this.renderCurrentTask();
-        } catch (error) {
-            alert('Error creating task: ' + error.message);
-        } finally {
-            showLoading(false);
-        }
-    }
+     async onNewTask() {
+      showLoading(true);
+      try {
+          const task = await this.dm.addTask();
+          console.log('New task created:', task);
+          // Force refresh by clearing current task
+          this.currentTaskId = null;
+          await this.renderCurrentTask();
+          console.log('Checklist refreshed');
+      } catch (error) {
+          console.error('Error creating task:', error);
+          alert('Error creating task: ' + error.message);
+      } finally {
+          showLoading(false);
+      }
+  }
 
     async onRenameTask() {
         if (!this.currentTaskId) {
@@ -423,24 +438,38 @@ class UIManager {
     }
 
     async onPreviousTask() {
-        const tasks = await this.dm.getTasks();
-        const currentIndex = tasks.findIndex(t => t.id === this.currentTaskId);
+      console.log('Previous button clicked');
+      const tasks = await this.dm.getTasks();
+      console.log('Total tasks:', tasks.length);
+      console.log('Current task ID:', this.currentTaskId);
 
-        if (currentIndex < tasks.length - 1) {
-            this.currentTaskId = tasks[currentIndex + 1].id;
-            await this.renderCurrentTask();
-        }
-    }
+      if (tasks.length === 0 || !this.currentTaskId) {
+          console.log('No tasks or no current task');
+          return;
+      }
 
-    async onNextTask() {
-        const tasks = await this.dm.getTasks();
-        const currentIndex = tasks.findIndex(t => t.id === this.currentTaskId);
+      const currentIndex = tasks.findIndex(t => t.id === this.currentTaskId);
+      console.log('Current task index:', currentIndex);
 
-        if (currentIndex > 0) {
-            this.currentTaskId = tasks[currentIndex - 1].id;
-            await this.renderCurrentTask();
-        }
-    }
+      if (currentIndex < tasks.length - 1) {
+          console.log('Moving to previous task:', tasks[currentIndex + 1].name);
+          this.currentTaskId = tasks[currentIndex + 1].id;
+          await this.renderCurrentTask();
+      } else {
+          console.log('Already at oldest task');
+      }
+  }
+
+  async onNextTask() {
+      const tasks = await this.dm.getTasks();
+      if (tasks.length === 0 || !this.currentTaskId) return;
+
+      const currentIndex = tasks.findIndex(t => t.id === this.currentTaskId);
+      if (currentIndex > 0) {
+          this.currentTaskId = tasks[currentIndex - 1].id;
+          await this.renderCurrentTask();
+      }
+  }
 
     updateUserEmail(email) {
         document.getElementById('userEmail').textContent = email;

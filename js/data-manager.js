@@ -223,25 +223,28 @@ class DataManager {
     // ========== TASKS ==========
 
     async addTask(name = '') {
-        try {
-            const taskId = this.generateId();
-            const now = new Date().toISOString();
+      try {
+          const taskId = this.generateId();
+          const now = new Date().toISOString();
 
-            const taskData = {
-                id: taskId,
-                name: name || this.generateTaskName(),
-                timestamp: now,
-                checked_items: [],
-                date: now.split('T')[0] // Store date for querying
-            };
+          // Generate task name - need to await since it's async
+          const taskName = name || await this.generateTaskName();
 
-            await this.userDocRef.collection('tasks').doc(taskId).set(taskData);
-            return taskData;
-        } catch (error) {
-            console.error('Error adding task:', error);
-            throw error;
-        }
-    }
+          const taskData = {
+              id: taskId,
+              name: taskName,
+              timestamp: now,
+              checked_items: [],
+              date: now.split('T')[0]
+          };
+
+          await this.userDocRef.collection('tasks').doc(taskId).set(taskData);
+          return taskData;
+      } catch (error) {
+          console.error('Error adding task:', error);
+          throw error;
+      }
+  }
 
     async getTasks() {
         try {
@@ -359,18 +362,29 @@ class DataManager {
 
     // ========== UTILITY ==========
 
-    generateTaskName() {
-        const now = new Date();
-        const dateStr = now.toISOString().split('T')[0].replace(/-/g, '.');
-        const dateParts = dateStr.split('.');
-        const shortDate = `${dateParts[0]}.${dateParts[1]}${dateParts[2]}`;
+    async generateTaskName() {
+      const now = new Date();
+      // Format: YYYY.MMDD
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const dateStr = `${year}.${month}${day}`;
 
-        // Count tasks created today (this will be approximation for now)
-        // In production, you'd query tasks by date
-        const tradeNum = 1; // Default to 1, will be updated dynamically
+      // Count tasks created TODAY
+      const today = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const tasks = await this.getTasks();
 
-        return `${shortDate}-trade${tradeNum}`;
-    }
+      let todayCount = 0;
+      tasks.forEach(task => {
+          const taskDate = task.timestamp.split('T')[0]; // Extract YYYY-MM-DD
+          if (taskDate === today) {
+              todayCount++;
+          }
+      });
+
+      const tradeNum = todayCount + 1;
+      return `${dateStr}-trade${tradeNum}`;
+  }
 
     generateId() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
