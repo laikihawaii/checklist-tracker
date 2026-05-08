@@ -1,0 +1,19 @@
+{
+  "name": "checklist-tracker-web",
+  "version": "1.0.0",
+  "description": "Multi-device checklist tracker web app with Firebase backend",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": [
+    "checklist",
+    "tracker",
+    "tasks",
+    "firebase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}

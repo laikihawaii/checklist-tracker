@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Auth Screen -->
+        <div id="authScreen" class="screen active">
+            <div class="auth-card">
+                <h1>Checklist Tracker</h1>
+                <p>Sign in with your email</p>
+
+                <div class="form-group">
+                    <input type="email" id="authEmail" placeholder="Email" class="input-field">
+                </div>
+
+                <div class="form-group">
+                    <input type="password" id="authPassword" placeholder="Password" class="input-field">
+                </div>
+
+                <div class="form-group">
+                    <button id="loginBtn" class="btn btn-primary">Sign In</button>
+                    <button id="signupBtn" class="btn btn-secondary">Create Account</button>
+                </div>
+
+                <div id="authError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- Main App Screen -->
+        <div id="mainScreen" class="screen">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-top">
+                    <h1>Checklist Tracker</h1>
+                    <button id="logoutBtn" class="btn-icon">⚙️</button>
+                </div>
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="checklist">Checklist</button>
+                    <button class="tab-btn" data-tab="statistics">Statistics</button>
+                    <button class="tab-btn" data-tab="template">Template</button>
+                </div>
+            </div>
+
+            <!-- Checklist Tab -->
+            <div id="checklistTab" class="tab-content active">
+                <!-- Active Task Display -->
+                <div class="task-header">
+                    <div class="task-info">
+                        <h2 id="currentTaskName">No task yet</h2>
+                        <span id="taskDate" class="task-date"></span>
+                    </div>
+                    <div class="task-controls">
+                        <button id="prevTaskBtn" class="btn btn-sm">← Previous</button>
+                        <button id="nextTaskBtn" class="btn btn-sm">Next →</button>
+                    </div>
+                </div>
+
+                <!-- Task Actions -->
+                <div class="task-actions">
+                    <button id="newTaskBtn" class="btn btn-primary">+ New Task</button>
+                    <button id="renameTaskBtn" class="btn btn-secondary">Rename Task</button>
+                    <button id="deleteTaskBtn" class="btn btn-danger">Delete Task</button>
+                </div>
+
+                <!-- Checklist Items -->
+                <div id="checklistContainer" class="checklist-container">
+                    <!-- Groups and items will be rendered here -->
+                </div>
+
+                <!-- Clear All -->
+                <div class="checklist-footer">
+                    <button id="clearAllBtn" class="btn btn-danger">Clear All Tasks</button>
+                </div>
+            </div>
+
+            <!-- Statistics Tab -->
+            <div id="statisticsTab" class="tab-content">
+                <div class="stats-container">
+                    <h2>Item Statistics</h2>
+                    <table id="statsTable" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Checked</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsBody">
+                            <!-- Stats will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Template Tab -->
+            <div id="templateTab" class="tab-content">
+                <h2>Edit Template</h2>
+
+                <div class="template-layout">
+                    <!-- Groups List -->
+                    <div class="template-section">
+                        <h3>Groups</h3>
+                        <div id="groupsList" class="groups-list">
+                            <!-- Groups will be rendered here -->
+                        </div>
+                        <button id="addGroupBtn" class="btn btn-primary">+ Add Group</button>
+                    </div>
+
+                    <!-- Items in Selected Group -->
+                    <div class="template-section">
+                        <h3>Items in Group</h3>
+                        <div id="itemsList" class="items-list">
+                            <!-- Items will be rendered here -->
+                        </div>
+                        <div class="items-actions">
+                            <input type="text" id="newItemInput" placeholder="New item name" class="input-field">
+                            <button id="addItemBtn" class="btn btn-primary">Add Item</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>User: <span id="userEmail"></span></p>
+                <button id="logoutBtnModal" class="btn btn-danger">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="spinner"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/data-manager.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
