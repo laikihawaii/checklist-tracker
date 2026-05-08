@@ -76,53 +76,65 @@ function setupAuthListeners() {
 }
 
 async function handleLogin() {
-    const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPassword').value;
+      // Wait for Firebase to be ready
+      if (!firebaseReady || !auth) {
+          showAuthError('Firebase is initializing... please wait a moment and try again');
+          return;
+      }
 
-    if (!email || !password) {
-        showAuthError('Please enter email and password');
-        return;
-    }
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
 
-    showLoading(true);
-    clearAuthError();
+      if (!email || !password) {
+          showAuthError('Please enter email and password');
+          return;
+      }
 
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-    } catch (error) {
-        console.error('Login error:', error);
-        showAuthError(error.message);
-    } finally {
-        showLoading(false);
-    }
-}
+      showLoading(true);
+      clearAuthError();
+
+      try {
+          await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+          console.error('Login error:', error);
+          showAuthError(error.message);
+      } finally {
+          showLoading(false);
+      }
+  }
 
 async function handleSignup() {
-    const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPassword').value;
+      // Wait for Firebase to be ready
+      if (!firebaseReady || !auth) {
+          showAuthError('Firebase is initializing... please wait a moment and try again');
+          return;
+      }
 
-    if (!email || !password) {
-        showAuthError('Please enter email and password');
-        return;
-    }
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
 
-    if (password.length < 6) {
-        showAuthError('Password must be at least 6 characters');
-        return;
-    }
+      if (!email || !password) {
+          showAuthError('Please enter email and password');
+          return;
+      }
 
-    showLoading(true);
-    clearAuthError();
+      if (password.length < 6) {
+          showAuthError('Password must be at least 6 characters');
+          return;
+      }
 
-    try {
-        await auth.createUserWithEmailAndPassword(email, password);
-    } catch (error) {
-        console.error('Signup error:', error);
-        showAuthError(error.message);
-    } finally {
-        showLoading(false);
-    }
-}
+      showLoading(true);
+      clearAuthError();
+
+      try {
+          await auth.createUserWithEmailAndPassword(email, password);
+      } catch (error) {
+          console.error('Signup error:', error);
+          showAuthError(error.message);
+      } finally {
+          showLoading(false);
+      }
+  }
 
 async function handleLogout() {
     if (confirm('Are you sure you want to sign out?')) {
