@@ -177,22 +177,29 @@ function setupUIListeners() {
 }
 
 function setupRealtimeListeners() {
-    if (!dataManager) return;
+      if (!dataManager) return;
 
-    // Listen for task changes
-    dataManager.userDocRef.collection('tasks').orderBy('timestamp', 'desc').limit(1).onSnapshot(() => {
-        // Refresh current task display
-        uiManager.renderCurrentTask();
-    });
+      console.log('Setting up real-time listeners...');
 
-    // Listen for template changes
-    dataManager.userDocRef.collection('template_groups').onSnapshot(() => {
-        // If on template tab, refresh it
-        if (document.getElementById('templateTab').classList.contains('active')) {
-            uiManager.renderTemplate();
-        }
-    });
-}
+      // Listen for task changes
+      dataManager.userDocRef.collection('tasks').orderBy('timestamp', 'desc').limit(1).onSnapshot(() => {
+          console.log('Tasks changed - updating...');
+          uiManager.renderCurrentTask();
+      });
+
+      // Listen for template changes
+      dataManager.userDocRef.collection('template_groups').onSnapshot(() => {
+          console.log('Templates changed!');
+          const checklistTab = document.getElementById('checklistTab');
+          const isActive = checklistTab.classList.contains('active');
+          console.log('Checklist tab active?', isActive);
+
+          if (isActive) {
+              console.log('Rendering current task...');
+              uiManager.renderCurrentTask();
+          }
+      });
+  }
 
 // ========== SCREEN MANAGEMENT ==========
 
