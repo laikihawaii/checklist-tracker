@@ -213,6 +213,8 @@ html, body {
 #mainScreen {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    overflow: hidden;
 }
 
 .tab-content {
@@ -223,7 +225,88 @@ html, body {
 }
 
 .tab-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Checklist Tab Special Layout */
+#checklistTab.active {
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+}
+
+/* Task List Sidebar */
+.task-list-sidebar {
+    width: 220px;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    flex-shrink: 0;
+    display: none;
+}
+
+.task-list-sidebar h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.tasks-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.task-list-item {
+    padding: 10px 12px;
+    background: var(--bg-dark);
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    border-left: 3px solid var(--primary);
+}
+
+.task-list-item:hover {
+    background-color: #f0f0f0;
+    border-color: var(--primary);
+}
+
+.task-list-item.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.task-list-item-name {
+    font-weight: 500;
     display: block;
+    margin-bottom: 4px;
+}
+
+.task-list-item-date {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* Task Display Area */
+.task-display-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Show sidebar on desktop */
+@media (min-width: 1024px) {
+    #checklistTab.active .task-list-sidebar {
+        display: block;
+    }
 }
 
 /* Task Header */
@@ -284,6 +367,7 @@ html, body {
     flex-direction: column;
     gap: 16px;
     margin-bottom: 16px;
+    flex: 1;
 }
 
 .group-section {
@@ -454,24 +538,23 @@ html, body {
 }
 
 .items-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-  }
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
 
-  .items-actions input {
-      flex: 7;              /* Takes 70% of space */
-      padding: 10px 12px;
-      font-size: 14px;
-      min-width: 0;         /* Changed from 150px */
-  }
+.items-actions input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+    min-width: 150px;
+}
 
-  .items-actions button {
-      flex: 3;              /* Takes 30% of space */
-      padding: 10px 12px;
-      font-size: 14px;
-      white-space: nowrap;
-  }
+.items-actions button {
+    padding: 10px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+}
 
 /* Modal */
 .modal {

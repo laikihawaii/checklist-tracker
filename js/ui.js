@@ -68,6 +68,47 @@ class UIManager {
       document.getElementById('currentTaskName').textContent = task.name;
       document.getElementById('taskDate').textContent = dateStr;
       await this.renderChecklist(task.checked_items || []);
+      await this.renderTasksList(); // Refresh tasks list when task changes
+  }
+
+ async renderTasksList() {
+      const tasksList = document.getElementById('tasksList');
+      tasksList.innerHTML = '';
+
+      const tasks = await this.dm.getTasks();
+
+      if (tasks.length === 0) {
+          tasksList.innerHTML = '<p style="text-align: center; color: #666; font-size: 12px;">No tasks yet</p>';
+          return;
+      }
+
+      tasks.forEach(task => {
+          const taskItem = document.createElement('div');
+          taskItem.className = 'task-list-item';
+          if (task.id === this.currentTaskId) {
+              taskItem.classList.add('active');
+          }
+
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'task-list-item-name';
+          nameSpan.textContent = task.name;
+
+          const dateSpan = document.createElement('span');
+          dateSpan.className = 'task-list-item-date';
+          const date = new Date(task.timestamp);
+          dateSpan.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+          taskItem.appendChild(nameSpan);
+          taskItem.appendChild(dateSpan);
+
+          taskItem.addEventListener('click', () => {
+              this.currentTaskId = task.id;
+              this.renderCurrentTask();
+              this.renderTasksList(); // Refresh list to show active highlight
+          });
+
+          tasksList.appendChild(taskItem);
+      });
   }
 
     async renderChecklist(checkedItemIds = []) {
@@ -373,6 +414,7 @@ class UIManager {
           // Force refresh by clearing current task
           this.currentTaskId = null;
           await this.renderCurrentTask();
+          // renderTasksList will be called by renderCurrentTask
           console.log('Checklist refreshed');
       } catch (error) {
           console.error('Error creating task:', error);

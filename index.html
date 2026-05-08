@@ -48,33 +48,43 @@
 
             <!-- Checklist Tab -->
             <div id="checklistTab" class="tab-content active">
+                <!-- Task List Sidebar -->
+                <div class="task-list-sidebar">
+                    <h3>All Tasks</h3>
+                    <div id="tasksList" class="tasks-list-container">
+                        <!-- Tasks will be rendered here -->
+                    </div>
+                </div>
+
                 <!-- Active Task Display -->
-                <div class="task-header">
-                    <div class="task-info">
-                        <h2 id="currentTaskName">No task yet</h2>
-                        <span id="taskDate" class="task-date"></span>
+                <div class="task-display-area">
+                    <div class="task-header">
+                        <div class="task-info">
+                            <h2 id="currentTaskName">No task yet</h2>
+                            <span id="taskDate" class="task-date"></span>
+                        </div>
+                        <div class="task-controls">
+                            <button id="prevTaskBtn" class="btn btn-sm">← Previous</button>
+                            <button id="nextTaskBtn" class="btn btn-sm">Next →</button>
+                        </div>
                     </div>
-                    <div class="task-controls">
-                        <button id="prevTaskBtn" class="btn btn-sm">← Previous</button>
-                        <button id="nextTaskBtn" class="btn btn-sm">Next →</button>
+
+                    <!-- Task Actions -->
+                    <div class="task-actions">
+                        <button id="newTaskBtn" class="btn btn-primary">+ New Task</button>
+                        <button id="renameTaskBtn" class="btn btn-secondary">Rename Task</button>
+                        <button id="deleteTaskBtn" class="btn btn-danger">Delete Task</button>
                     </div>
-                </div>
 
-                <!-- Task Actions -->
-                <div class="task-actions">
-                    <button id="newTaskBtn" class="btn btn-primary">+ New Task</button>
-                    <button id="renameTaskBtn" class="btn btn-secondary">Rename Task</button>
-                    <button id="deleteTaskBtn" class="btn btn-danger">Delete Task</button>
-                </div>
+                    <!-- Checklist Items -->
+                    <div id="checklistContainer" class="checklist-container">
+                        <!-- Groups and items will be rendered here -->
+                    </div>
 
-                <!-- Checklist Items -->
-                <div id="checklistContainer" class="checklist-container">
-                    <!-- Groups and items will be rendered here -->
-                </div>
-
-                <!-- Clear All -->
-                <div class="checklist-footer">
-                    <button id="clearAllBtn" class="btn btn-danger">Clear All Tasks</button>
+                    <!-- Clear All -->
+                    <div class="checklist-footer">
+                        <button id="clearAllBtn" class="btn btn-danger">Clear All Tasks</button>
+                    </div>
                 </div>
             </div>
 
