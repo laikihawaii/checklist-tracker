@@ -4,9 +4,9 @@ class UIManager {
     constructor(dataManager) {
         this.dm = dataManager;
         this.currentTaskId = null;
+        this.isRendering = false;
+        this.currentGroupId = null;
     }
-
-    // ========== TAB MANAGEMENT ==========
 
     setupTabButtons() {
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -14,35 +14,24 @@ class UIManager {
         });
     }
 
-    switchTab(tabName) {
-        // Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
+     switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-        // Remove active from all buttons
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+      const tabElement = document.getElementById(`${tabName}Tab`);
+      if (tabElement) tabElement.classList.add('active');
 
-        // Show selected tab
-        const tabElement = document.getElementById(`${tabName}Tab`);
-        if (tabElement) {
-            tabElement.classList.add('active');
-        }
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
-        // Mark button as active
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
-        // Load data if switching to statistics or template
-        if (tabName === 'statistics') {
-            this.renderStatistics();
-        } else if (tabName === 'template') {
-            this.renderTemplate();
-        }
-    }
-
-    // ========== TASK DISPLAY ==========
+      if (tabName === 'statistics') {
+          this.renderStatistics();
+      } else if (tabName === 'template') {
+          this.renderTemplate();
+      } else if (tabName === 'checklist') {
+          // Refresh checklist when switching to it to show any template changes
+          this.renderCurrentTask();
+      }
+  }
 
     async renderCurrentTask() {
         const tasks = await this.dm.getTasks();
@@ -55,7 +44,6 @@ class UIManager {
             return;
         }
 
-        // Show first (most recent) task
         const task = tasks[0];
         this.currentTaskId = task.id;
 
@@ -69,81 +57,79 @@ class UIManager {
 
         document.getElementById('currentTaskName').textContent = task.name;
         document.getElementById('taskDate').textContent = dateStr;
-
-        // Render checklist with checked items from current task
         await this.renderChecklist(task.checked_items || []);
     }
 
     async renderChecklist(checkedItemIds = []) {
-        const container = document.getElementById('checklistContainer');
-        container.innerHTML = '';
+        if (this.isRendering) return;
+        this.isRendering = true;
 
-        const groups = await this.dm.getGroups();
+        try {
+            const container = document.getElementById('checklistContainer');
+            container.innerHTML = '';
 
-        if (groups.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No items yet. Add items in Template tab.</p>';
-            return;
-        }
+            const groups = await this.dm.getGroups();
 
-        groups.forEach(group => {
-            const groupSection = document.createElement('div');
-            groupSection.className = 'group-section';
-
-            // Group header
-            const header = document.createElement('div');
-            header.className = 'group-header';
-            header.textContent = group.name;
-            groupSection.appendChild(header);
-
-            // Group items
-            const itemsDiv = document.createElement('div');
-            itemsDiv.className = 'group-items';
-
-            const items = group.items || [];
-            if (items.length === 0) {
-                const emptyMsg = document.createElement('p');
-                emptyMsg.style.cssText = 'text-align: center; color: #666; padding: 12px; font-size: 14px;';
-                emptyMsg.textContent = 'No items in this group';
-                itemsDiv.appendChild(emptyMsg);
-            } else {
-                items.forEach(item => {
-                    const isChecked = checkedItemIds.includes(item.id);
-
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'checklist-item';
-
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `item-${item.id}`;
-                    checkbox.checked = isChecked;
-                    checkbox.dataset.itemId = item.id;
-                    checkbox.addEventListener('change', () => this.onItemCheckChanged());
-
-                    const label = document.createElement('label');
-                    label.htmlFor = `item-${item.id}`;
-                    label.textContent = item.name;
-
-                    itemDiv.appendChild(checkbox);
-                    itemDiv.appendChild(label);
-                    itemsDiv.appendChild(itemDiv);
-                });
+            if (groups.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No items yet. Add items in Template tab.</p>';
+                return;
             }
 
-            groupSection.appendChild(itemsDiv);
-            container.appendChild(groupSection);
-        });
+            groups.forEach(group => {
+                const groupSection = document.createElement('div');
+                groupSection.className = 'group-section';
+
+                const header = document.createElement('div');
+                header.className = 'group-header';
+                header.textContent = group.name;
+                groupSection.appendChild(header);
+
+                const itemsDiv = document.createElement('div');
+                itemsDiv.className = 'group-items';
+
+                const items = group.items || [];
+                if (items.length === 0) {
+                    const emptyMsg = document.createElement('p');
+                    emptyMsg.style.cssText = 'text-align: center; color: #666; padding: 12px; font-size: 14px;';
+                    emptyMsg.textContent = 'No items in this group';
+                    itemsDiv.appendChild(emptyMsg);
+                } else {
+                    items.forEach(item => {
+                        const isChecked = checkedItemIds.includes(item.id);
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'checklist-item';
+
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `item-${item.id}`;
+                        checkbox.checked = isChecked;
+                        checkbox.dataset.itemId = item.id;
+                        checkbox.addEventListener('change', () => this.onItemCheckChanged());
+
+                        const label = document.createElement('label');
+                        label.htmlFor = `item-${item.id}`;
+                        label.textContent = item.name;
+
+                        itemDiv.appendChild(checkbox);
+                        itemDiv.appendChild(label);
+                        itemsDiv.appendChild(itemDiv);
+                    });
+                }
+
+                groupSection.appendChild(itemsDiv);
+                container.appendChild(groupSection);
+            });
+        } finally {
+            this.isRendering = false;
+        }
     }
 
     async onItemCheckChanged() {
         if (!this.currentTaskId) return;
-
         const checkedItems = Array.from(document.querySelectorAll('.checklist-item input[type="checkbox"]:checked'))
             .map(cb => cb.dataset.itemId);
-
         await this.dm.updateTaskCheckedItems(this.currentTaskId, checkedItems);
     }
-
-    // ========== STATISTICS ==========
 
     async renderStatistics() {
         const tbody = document.getElementById('statsBody');
@@ -159,16 +145,10 @@ class UIManager {
 
         statsArray.forEach(stat => {
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${stat.name}</td>
-                <td>${stat.count_checked} / ${stat.total_tasks}</td>
-                <td>${stat.percentage}%</td>
-            `;
+            row.innerHTML = `<td>${stat.name}</td><td>${stat.count_checked} / ${stat.total_tasks}</td><td>${stat.percentage}%</td>`;
             tbody.appendChild(row);
         });
     }
-
-    // ========== TEMPLATE EDITOR ==========
 
     async renderTemplate() {
         await this.renderGroups();
@@ -216,7 +196,6 @@ class UIManager {
             downBtn.disabled = index === groups.length - 1;
             downBtn.addEventListener('click', () => this.moveGroupDown(group.id));
 
-            // Click to select group
             groupDiv.addEventListener('click', (e) => {
                 if (!e.target.closest('.group-actions')) {
                     this.selectGroup(group.id);
@@ -244,7 +223,6 @@ class UIManager {
     }
 
     selectGroup(groupId) {
-        // Visual feedback - highlight selected group
         document.querySelectorAll('.group-item').forEach(item => {
             item.style.backgroundColor = item.dataset.groupId === groupId ? '#E5E5EA' : '';
         });
@@ -305,11 +283,8 @@ class UIManager {
             });
         }
 
-        // Store current group ID for add item action
         this.currentGroupId = groupId;
     }
-
-    // ========== EDIT DIALOGS ==========
 
     async editGroup(groupId, currentName) {
         const newName = prompt('Edit group name:', currentName);
@@ -360,8 +335,6 @@ class UIManager {
         await this.dm.moveItemDown(groupId, itemId);
         await this.renderItemsForGroup(groupId);
     }
-
-    // ========== ADD OPERATIONS ==========
 
     async onAddGroup() {
         const name = prompt('Enter group name:');
@@ -468,8 +441,6 @@ class UIManager {
             await this.renderCurrentTask();
         }
     }
-
-    // ========== SETTINGS ==========
 
     updateUserEmail(email) {
         document.getElementById('userEmail').textContent = email;
